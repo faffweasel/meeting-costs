@@ -35,10 +35,13 @@ Faffweasel brand. Monospace throughout. Defined as CSS custom properties.
 |-------|-------|------|
 | `--bg` | `#f4f4f0` | `#0e0e0e` |
 | `--text` | `#1a1a1a` | `#c8c8c0` |
-| `--muted` | `#888888` | `#999999` |
+| `--muted` | `#6b6b6b` | `#a3a3a3` |
+| `--faint` | `#767676` | `#949494` |
 | `--accent` | `#007070` | `#00a3a3` |
-| `--border` | `#d4d4cc` | `#2a2a2a` |
+| `--accent-muted` | `#5a8a8a` | `#558888` |
+| `--border` | `#8c8c85` | `#3a3a3a` |
 | `--surface` | `#ffffff` | `#181818` |
+| `--focus-ring` | `#007070` | `#00a3a3` |
 
 Font: `Courier New`, monospace. No web fonts. No external font requests.
 

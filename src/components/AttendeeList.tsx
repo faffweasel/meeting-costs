@@ -49,7 +49,7 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
   }
 
   return (
-    <div className="mt-8 space-y-2">
+    <div className="mt-8 space-y-1">
       {attendees.map((attendee) => (
         <AttendeeRow
           key={attendee.id}
@@ -66,7 +66,7 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
             <button
               type="button"
               onClick={handleAdd}
-              className="min-h-[44px] border border-[var(--border)] px-4 py-2 text-xs tracking-wider text-[var(--accent)] hover:bg-[var(--surface)]"
+              className="min-h-[44px] border border-[var(--border)] px-4 py-2 tracking-wider text-[var(--accent)] hover:bg-[var(--surface)]"
             >
               + ADD ATTENDEE
             </button>
@@ -76,9 +76,10 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
             className="flex flex-wrap items-center justify-center gap-2 pt-2"
             style={{ color: 'var(--muted)' }}
           >
-            <span className="text-xs tracking-wider">ADD</span>
+            <span className="tracking-wider">ADD</span>
             <input
               type="number"
+              inputMode="decimal"
               value={quickCount}
               onChange={handleQuickCountChange}
               min={1}
@@ -87,9 +88,10 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
               style={{ color: 'var(--text)' }}
               aria-label="Number of people to add"
             />
-            <span className="text-xs tracking-wider">AT £</span>
+            <span className="tracking-wider">AT £</span>
             <input
               type="number"
+              inputMode="decimal"
               value={quickSalary}
               onChange={handleQuickSalaryChange}
               min={0}
@@ -101,7 +103,7 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
             <button
               type="button"
               onClick={handleQuickAdd}
-              className="min-h-[44px] bg-[var(--accent)] px-4 py-2 text-xs font-bold tracking-wider text-[var(--bg)] hover:opacity-80"
+              className="min-h-[44px] bg-[var(--accent)] px-4 py-2 font-bold tracking-wider text-[var(--bg)] hover:opacity-80"
             >
               ADD
             </button>

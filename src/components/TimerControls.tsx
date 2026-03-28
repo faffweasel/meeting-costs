@@ -9,10 +9,10 @@ interface TimerControlsProps {
 }
 
 const primaryClass =
-  'min-h-[44px] px-6 py-3 text-sm font-bold tracking-wider bg-[var(--accent)] text-[var(--bg)] hover:opacity-80';
+  'min-h-[44px] px-6 py-3 font-bold tracking-wider bg-[var(--accent)] text-[var(--bg)] hover:opacity-80';
 
 const secondaryClass =
-  'min-h-[44px] px-6 py-3 text-sm tracking-wider border border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface)]';
+  'min-h-[44px] px-6 py-3 tracking-wider border border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface)]';
 
 function TimerControls({
   timerState,
@@ -22,7 +22,7 @@ function TimerControls({
   onReset,
 }: TimerControlsProps): React.ReactNode {
   return (
-    <div className="mt-8 flex justify-center gap-3">
+    <div className="sticky top-0 z-10 mt-8 flex justify-center gap-3 py-3" style={{ backgroundColor: 'var(--bg)' }}>
       {timerState === 'idle' && (
         <button type="button" onClick={onStart} className={primaryClass}>
           START

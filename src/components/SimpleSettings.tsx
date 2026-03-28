@@ -14,6 +14,13 @@ function SimpleSettings({
   onPeopleChange,
   onSalaryChange,
 }: SimpleSettingsProps): React.ReactNode {
+  function handlePeopleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = Number(e.target.value);
+    if (!Number.isNaN(value)) {
+      onPeopleChange(Math.max(1, Math.min(100, Math.round(value))));
+    }
+  }
+
   function handlePeopleDecrement() {
     onPeopleChange(Math.max(1, people - 1));
   }
@@ -25,27 +32,42 @@ function SimpleSettings({
   function handleSalaryChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = Number(e.target.value);
     if (!Number.isNaN(value)) {
-      onSalaryChange(Math.max(0, value));
+      onSalaryChange(Math.max(1, value));
     }
   }
 
   return (
     <div className="mx-auto mt-10 flex max-w-sm justify-center gap-8">
       <fieldset className="m-0 border-0 p-0">
-        <legend className="mb-2 text-xs tracking-wider" style={{ color: 'var(--muted)' }}>
+        <legend className="mb-2 text-sm tracking-wider" style={{ color: 'var(--muted)' }}>
           PEOPLE
         </legend>
         <div className="flex items-center">
-          <button type="button" onClick={handlePeopleDecrement} className={stepperBtnClass}>
+          <button
+            type="button"
+            onClick={handlePeopleDecrement}
+            aria-label="Decrease number of people"
+            className={stepperBtnClass}
+          >
             −
           </button>
-          <span
-            className="flex min-h-[44px] w-12 items-center justify-center border-y border-[var(--border)] text-sm"
+          <input
+            type="number"
+            inputMode="numeric"
+            value={people}
+            onChange={handlePeopleChange}
+            min={1}
+            max={100}
+            aria-label="Number of people"
+            className="min-h-[44px] w-12 border-y border-[var(--border)] bg-transparent text-center"
             style={{ color: 'var(--text)' }}
+          />
+          <button
+            type="button"
+            onClick={handlePeopleIncrement}
+            aria-label="Increase number of people"
+            className={stepperBtnClass}
           >
-            {people}
-          </span>
-          <button type="button" onClick={handlePeopleIncrement} className={stepperBtnClass}>
             +
           </button>
         </div>
@@ -54,26 +76,28 @@ function SimpleSettings({
       <div>
         <label
           htmlFor="average-salary"
-          className="mb-2 block text-xs tracking-wider"
+          className="mb-2 block text-sm tracking-wider"
           style={{ color: 'var(--muted)' }}
         >
           AVG SALARY
         </label>
         <div className="flex items-center">
           <span
-            className="flex min-h-[44px] items-center border border-r-0 border-[var(--border)] px-2 text-sm"
+            className="flex min-h-[44px] items-center border border-r-0 border-[var(--border)] px-2"
             style={{ color: 'var(--muted)' }}
+            aria-hidden="true"
           >
             £
           </span>
           <input
             id="average-salary"
             type="number"
+            inputMode="decimal"
             value={averageSalary}
             onChange={handleSalaryChange}
-            min={0}
+            min={1}
             step={1000}
-            className="min-h-[44px] w-28 border border-[var(--border)] bg-transparent px-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="min-h-[44px] w-28 border border-[var(--border)] bg-transparent px-2"
             style={{ color: 'var(--text)' }}
           />
         </div>

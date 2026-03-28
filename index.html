@@ -4,7 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>meeting-costs</title>
+    <title>Meeting Cost Calculator — Faffweasel Industries</title>
+    <meta name="description" content="Real-time meeting cost calculator. See what your meetings actually cost. No data leaves your browser." />
+    <meta property="og:title" content="Meeting Cost Calculator" />
+    <meta property="og:description" content="Real-time meeting cost calculator. See what your meetings actually cost. No data leaves your browser." />
+    <meta property="og:url" content="https://meetings.faffweasel.com" />
+    <meta property="og:type" content="website" />
+    <script>
+      const t = localStorage.getItem('theme');
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    </script>
   </head>
   <body>
     <div id="root"></div>

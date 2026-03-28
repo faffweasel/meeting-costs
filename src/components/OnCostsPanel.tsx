@@ -35,7 +35,7 @@ function OnCostsPanel({
   return (
     <div className="mt-6">
       <label
-        className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 text-base"
+        className="inline-flex min-h-[44px] cursor-pointer items-center gap-2"
         style={{ color: 'var(--text)' }}
       >
         <input
@@ -51,7 +51,7 @@ function OnCostsPanel({
         <>
           <div className="mt-1">
             <label
-              className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 text-sm"
+              className="inline-flex min-h-[44px] cursor-pointer items-center gap-2"
               style={{ color: 'var(--text)' }}
             >
               <input
@@ -67,13 +67,13 @@ function OnCostsPanel({
           {showBreakdown && (
             <details className="mt-4">
               <summary
-                className="cursor-pointer text-xs tracking-wider"
+                className="cursor-pointer text-sm tracking-wider"
                 style={{ color: 'var(--muted)' }}
               >
                 ON-COSTS BREAKDOWN
               </summary>
               <div className="mt-2 overflow-x-auto">
-                <table className="w-full text-sm" style={{ color: 'var(--text)' }}>
+                <table className="w-full" style={{ color: 'var(--text)' }}>
                   <thead>
                     <tr
                       className="border-b border-[var(--border)]"

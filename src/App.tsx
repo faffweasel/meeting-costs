@@ -1,10 +1,14 @@
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { AttendeeList } from './components/AttendeeList.tsx';
 import { CostDisplay } from './components/CostDisplay.tsx';
+import { DarkModeToggle } from './components/DarkModeToggle.tsx';
+import { Faq } from './components/Faq.tsx';
+import { Footer } from './components/Footer.tsx';
 import type { Mode } from './components/ModeToggle.tsx';
 import { ModeToggle } from './components/ModeToggle.tsx';
 import { OnCostsPanel } from './components/OnCostsPanel.tsx';
+import { PrivacyNotice } from './components/PrivacyNotice.tsx';
 import { SimpleSettings } from './components/SimpleSettings.tsx';
 import { TimerControls } from './components/TimerControls.tsx';
 import type { Attendee } from './lib/attendee.ts';
@@ -17,13 +21,8 @@ import { createTimer } from './lib/timer.ts';
 const timer = createTimer();
 
 export default function App(): ReactNode {
-  const timerRef = useRef(timer);
-  const rafRef = useRef(0);
-  const lastUpdateRef = useRef(0);
-
   const [mode, setMode] = useState<Mode>('simple');
   const [timerState, setTimerState] = useState<TimerState>('idle');
-  const [elapsedMs, setElapsedMs] = useState(0);
 
   const [people, setPeople] = useState(4);
   const [averageSalary, setAverageSalary] = useState(35_000);
@@ -36,44 +35,24 @@ export default function App(): ReactNode {
   const [includeOnCosts, setIncludeOnCosts] = useState(false);
   const [includeLevy, setIncludeLevy] = useState(true);
 
-  useEffect(() => {
-    if (timerState !== 'running') return;
-
-    function tick() {
-      const now = performance.now();
-      if (now - lastUpdateRef.current >= 100) {
-        setElapsedMs(timerRef.current.elapsed());
-        lastUpdateRef.current = now;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    }
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [timerState]);
-
   const handleStart = useCallback(() => {
-    timerRef.current.start();
+    timer.start();
     setTimerState('running');
-    lastUpdateRef.current = performance.now();
   }, []);
 
   const handlePause = useCallback(() => {
-    timerRef.current.pause();
+    timer.pause();
     setTimerState('paused');
-    setElapsedMs(timerRef.current.elapsed());
   }, []);
 
   const handleResume = useCallback(() => {
-    timerRef.current.resume();
+    timer.resume();
     setTimerState('running');
-    lastUpdateRef.current = performance.now();
   }, []);
 
   const handleReset = useCallback(() => {
-    timerRef.current.reset();
+    timer.reset();
     setTimerState('idle');
-    setElapsedMs(0);
   }, []);
 
   const handleModeChange = useCallback(
@@ -103,28 +82,25 @@ export default function App(): ReactNode {
       : [];
   const simpleOnCosts = includeOnCosts ? calculateOnCosts(averageSalary, includeLevy) : null;
 
-  const salaryCost =
-    mode === 'simple'
-      ? calculateSimpleCost(people, averageSalary, elapsedMs)
-      : calculateAdvancedCost(salaries, elapsedMs);
-
   const effectiveSalary =
     includeOnCosts && simpleOnCosts ? simpleOnCosts.totalEmploymentCost : averageSalary;
   const trueCostSalaries = onCostsPerAttendee.map((oc) => oc.totalEmploymentCost);
 
-  const cost =
+  const computeCost = (ms: number) =>
     mode === 'simple'
-      ? calculateSimpleCost(people, effectiveSalary, elapsedMs)
+      ? calculateSimpleCost(people, effectiveSalary, ms)
       : includeOnCosts
-        ? calculateAdvancedCost(trueCostSalaries, elapsedMs)
-        : salaryCost;
+        ? calculateAdvancedCost(trueCostSalaries, ms)
+        : calculateAdvancedCost(salaries, ms);
 
-  const perMinuteRate =
-    mode === 'simple'
-      ? calculateSimpleCost(people, effectiveSalary, 60_000)
-      : includeOnCosts
-        ? calculateAdvancedCost(trueCostSalaries, 60_000)
-        : calculateAdvancedCost(salaries, 60_000);
+  const computeSalaryCost = includeOnCosts
+    ? (ms: number) =>
+        mode === 'simple'
+          ? calculateSimpleCost(people, averageSalary, ms)
+          : calculateAdvancedCost(salaries, ms)
+    : null;
+
+  const perMinuteRate = computeCost(60_000);
 
   const onCostPercentage =
     mode === 'simple' && simpleOnCosts
@@ -135,48 +111,70 @@ export default function App(): ReactNode {
         : 0;
 
   return (
-    <main className="mx-auto max-w-[720px] px-4 py-12 text-center">
-      <h1 className="text-lg font-bold tracking-widest" style={{ color: 'var(--text)' }}>
-        MEETING COST CALCULATOR
-      </h1>
-      <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
-        meetings.faffweasel.com
-      </p>
-
-      <ModeToggle mode={mode} onModeChange={handleModeChange} />
-      <CostDisplay
-        cost={cost}
-        elapsedMs={elapsedMs}
-        perMinuteRate={perMinuteRate}
-        timerState={timerState}
-        salaryCost={includeOnCosts ? salaryCost : null}
-        onCostPercentage={onCostPercentage}
-      />
-      {mode === 'simple' ? (
-        <SimpleSettings
-          people={people}
-          averageSalary={averageSalary}
-          onPeopleChange={setPeople}
-          onSalaryChange={setAverageSalary}
+    <>
+      <header
+        className="border-b px-4 py-4"
+        style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+      >
+        <div className="mx-auto flex max-w-[720px] items-center justify-between">
+          <div>
+            <div className="text-2xl font-bold tracking-wide" style={{ color: 'var(--text)' }}>
+              MEETING COST CALCULATOR
+            </div>
+            <div className="mt-0.5" style={{ color: 'var(--muted)' }}>
+              by{' '}
+              <a
+                href="https://faffweasel.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)' }}
+              >
+                faffweasel
+              </a>
+            </div>
+          </div>
+          <DarkModeToggle />
+        </div>
+      </header>
+      <main className="mx-auto max-w-[720px] px-4 py-12 text-center">
+        <ModeToggle mode={mode} onModeChange={handleModeChange} />
+        <CostDisplay
+          timer={timer}
+          timerState={timerState}
+          computeCost={computeCost}
+          computeSalaryCost={computeSalaryCost}
+          perMinuteRate={perMinuteRate}
+          onCostPercentage={onCostPercentage}
         />
-      ) : (
-        <AttendeeList attendees={attendees} onAttendeesChange={setAttendees} />
-      )}
-      <OnCostsPanel
-        includeOnCosts={includeOnCosts}
-        onIncludeOnCostsChange={setIncludeOnCosts}
-        includeLevy={includeLevy}
-        onIncludeLevyChange={setIncludeLevy}
-        attendees={mode === 'advanced' ? attendees : null}
-        onCostsPerAttendee={onCostsPerAttendee}
-      />
-      <TimerControls
-        timerState={timerState}
-        onStart={handleStart}
-        onPause={handlePause}
-        onResume={handleResume}
-        onReset={handleReset}
-      />
-    </main>
+        <TimerControls
+          timerState={timerState}
+          onStart={handleStart}
+          onPause={handlePause}
+          onResume={handleResume}
+          onReset={handleReset}
+        />
+        {mode === 'simple' ? (
+          <SimpleSettings
+            people={people}
+            averageSalary={averageSalary}
+            onPeopleChange={setPeople}
+            onSalaryChange={setAverageSalary}
+          />
+        ) : (
+          <AttendeeList attendees={attendees} onAttendeesChange={setAttendees} />
+        )}
+        <OnCostsPanel
+          includeOnCosts={includeOnCosts}
+          onIncludeOnCostsChange={setIncludeOnCosts}
+          includeLevy={includeLevy}
+          onIncludeLevyChange={setIncludeLevy}
+          attendees={mode === 'advanced' ? attendees : null}
+          onCostsPerAttendee={onCostsPerAttendee}
+        />
+        <Faq />
+        <PrivacyNotice />
+        <Footer />
+      </main>
+    </>
   );
 }
