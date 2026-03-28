@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4f4f0;
+  --text: #1a1a1a;
+  --muted: #888888;
+  --accent: #007070;
+  --border: #d4d4cc;
+  --surface: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e0e0e;
+    --text: #c8c8c0;
+    --muted: #999999;
+    --accent: #00a3a3;
+    --border: #2a2a2a;
+    --surface: #181818;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: "Courier New", monospace;
+  color: var(--text);
+  background: var(--bg);
+}
