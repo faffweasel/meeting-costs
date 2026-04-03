@@ -22,7 +22,10 @@ function TimerControls({
   onReset,
 }: TimerControlsProps): React.ReactNode {
   return (
-    <div className="sticky top-0 z-10 mt-8 flex justify-center gap-3 py-3" style={{ backgroundColor: 'var(--bg)' }}>
+    <div
+      className="sticky top-0 z-10 mt-8 flex justify-center gap-3 py-3"
+      style={{ backgroundColor: 'var(--bg)' }}
+    >
       {timerState === 'idle' && (
         <button type="button" onClick={onStart} className={primaryClass}>
           START

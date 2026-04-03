@@ -101,10 +101,7 @@ function CostDisplay({
       <p className="text-5xl font-bold" style={{ color: 'var(--text)' }}>
         {formatCost(cost)}
       </p>
-      <p
-        className={showTrueCost ? '' : 'invisible'}
-        style={{ color: 'var(--muted)' }}
-      >
+      <p className={showTrueCost ? '' : 'invisible'} style={{ color: 'var(--muted)' }}>
         On-costs add ~{Math.round(onCostPercentage * 100)}% to salary cost
       </p>
       <div className="mt-3 flex items-center justify-center gap-2">
