@@ -1,27 +1,29 @@
-# Builds and deploys the meeting-costs app to Bunny.net Edge Storage (Stockholm),
-# then purges the CDN pull zone cache.
+# Deploy — meetings.faffweasel.com
 #
-# Required secrets (set in GitHub repo Settings > Secrets and variables > Actions):
-#   BUNNY_STORAGE_PASSWORD    — storage zone API key (FTP & API Access, not read-only)
-#   BUNNY_PULL_ZONE_ID   — numeric pull zone ID from the Bunny dashboard URL
+# Triggers on push to main. Runs lint, tests, and build, then uploads
+# the dist/ directory to Bunny Edge Storage (Stockholm region) and purges
+# the pull zone cache.
+#
+# Required secrets (GitHub repo Settings > Secrets and variables > Actions):
+#   BUNNY_API_KEY           — account-level API key, used for cache purge
+#   BUNNY_STORAGE_PASSWORD  — storage zone FTP/API password (not read-only)
+#   BUNNY_STORAGE_ZONE      — storage zone name
+#   BUNNY_PULL_ZONE_ID      — numeric pull zone ID from the Bunny dashboard URL
 
 name: Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: '22'
           cache: 'npm'
@@ -29,28 +31,103 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Biome check
+      - name: Lint and format check
         run: npx biome check .
 
-      - name: Test
+      - name: Run tests
         run: npm run test
 
       - name: Build
         run: npm run build
-          
+
+      - name: Delete stale files from Bunny Edge Storage
+        env:
+          BUNNY_STORAGE_PASSWORD: ${{ secrets.BUNNY_STORAGE_PASSWORD }}
+          BUNNY_STORAGE_ZONE: ${{ secrets.BUNNY_STORAGE_ZONE }}
+        run: |
+          ENDPOINT="https://se.storage.bunnycdn.com"
+
+          list_remote() {
+            local path="$1"
+            curl -s -X GET \
+              "${ENDPOINT}/${BUNNY_STORAGE_ZONE}/${path}" \
+              -H "AccessKey: ${BUNNY_STORAGE_PASSWORD}" \
+              -H "Accept: application/json"
+          }
+
+          collect_remote_files() {
+            local dir="$1"
+            local listing
+            listing=$(list_remote "$dir")
+            echo "$listing" | jq -r '.[] | if .IsDirectory then empty else .Path + .ObjectName end' 2>/dev/null || true
+            echo "$listing" | jq -r '.[] | select(.IsDirectory) | .Path + .ObjectName + "/"' 2>/dev/null | while IFS= read -r subdir; do
+              collect_remote_files "$subdir"
+            done
+          }
+
+          cd dist
+          LOCAL_FILES=$(find . -type f | sed 's|^\./|/'"${BUNNY_STORAGE_ZONE}"'/|')
+          cd ..
+
+          collect_remote_files "" | while IFS= read -r remote_file; do
+            [ -z "$remote_file" ] && continue
+            if ! echo "$LOCAL_FILES" | grep -qF "$remote_file"; then
+              echo "Deleting stale: $remote_file"
+              curl -s -X DELETE \
+                "${ENDPOINT}${remote_file}" \
+                -H "AccessKey: ${BUNNY_STORAGE_PASSWORD}" \
+                --fail \
+                || echo "WARNING: failed to delete $remote_file"
+            fi
+          done
+
       - name: Upload to Bunny Edge Storage
         env:
           BUNNY_STORAGE_PASSWORD: ${{ secrets.BUNNY_STORAGE_PASSWORD }}
           BUNNY_STORAGE_ZONE: ${{ secrets.BUNNY_STORAGE_ZONE }}
         run: |
-          find dist/ -type f | while read -r file; do
-            remote_path="${file#dist/}"
-            curl --fail --silent --show-error \
-              -X PUT \
+          mime_type() {
+            case "${1##*.}" in
+              html)        echo "text/html" ;;
+              css)         echo "text/css" ;;
+              js)          echo "application/javascript" ;;
+              json)        echo "application/json" ;;
+              svg)         echo "image/svg+xml" ;;
+              png)         echo "image/png" ;;
+              jpg|jpeg)    echo "image/jpeg" ;;
+              ico)         echo "image/x-icon" ;;
+              woff2)       echo "font/woff2" ;;
+              woff)        echo "font/woff" ;;
+              txt)         echo "text/plain" ;;
+              xml)         echo "application/xml" ;;
+              webmanifest) echo "application/manifest+json" ;;
+              *)           echo "application/octet-stream" ;;
+            esac
+          }
+
+          cache_header() {
+            case "$1" in
+              index.html) echo "no-cache" ;;
+              assets/*)   echo "max-age=31536000, immutable" ;;
+              *)          echo "max-age=86400" ;;
+            esac
+          }
+
+          ENDPOINT="https://se.storage.bunnycdn.com"
+          cd dist
+          find . -type f | while read -r file; do
+            filepath="${file#./}"
+            content_type=$(mime_type "$filepath")
+            cache_control=$(cache_header "$filepath")
+            echo "Uploading: $filepath ($content_type, $cache_control)"
+            curl -s -X PUT \
+              "${ENDPOINT}/${BUNNY_STORAGE_ZONE}/${filepath}" \
               -H "AccessKey: ${BUNNY_STORAGE_PASSWORD}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary "@${file}" \
-              "https://se.storage.bunnycdn.com/${BUNNY_STORAGE_ZONE}/${remote_path}"
+              -H "Content-Type: ${content_type}" \
+              -H "Cache-Control: ${cache_control}" \
+              --upload-file "$filepath" \
+              --fail \
+              || { echo "FAILED: $filepath"; exit 1; }
           done
 
       - name: Purge CDN cache
@@ -58,8 +135,7 @@ jobs:
           BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
           BUNNY_PULL_ZONE_ID: ${{ secrets.BUNNY_PULL_ZONE_ID }}
         run: |
-          curl --fail --silent --show-error \
-            -X POST \
+          curl -s -X POST \
+            "https://api.bunny.net/pullzone/${BUNNY_PULL_ZONE_ID}/purgeCache" \
             -H "AccessKey: ${BUNNY_API_KEY}" \
-            -H "Content-Length: 0" \
-            "https://api.bunny.net/pullzone/${BUNNY_PULL_ZONE_ID}/purgeCache"
+            --fail
