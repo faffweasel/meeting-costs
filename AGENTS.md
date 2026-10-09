@@ -115,3 +115,5 @@ const APPRENTICESHIP_LEVY_RATE = 0.005;
 ## Licence
 
 AGPL-3.0
+
+- After adding, removing or updating dependencies (including transitive packages), review and update the manually maintained `public/license.txt` with the versions and full copyright/licence notices for code or CSS shipped in the website. Keep the application's licence and logo rights consistent with `LICENCE` and `README.md`. Vite copies this file to `dist/license.txt` during the build.
