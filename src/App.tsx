@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { AttendeeList } from './components/AttendeeList.tsx';
 import { CostDisplay } from './components/CostDisplay.tsx';
 import { DarkModeToggle } from './components/DarkModeToggle.tsx';
+import { EstimateControls } from './components/EstimateControls.tsx';
 import { Faq } from './components/Faq.tsx';
 import { Footer } from './components/Footer.tsx';
 import type { Mode } from './components/ModeToggle.tsx';
@@ -23,6 +24,8 @@ const timer = createTimer();
 export default function App(): ReactNode {
   const [mode, setMode] = useState<Mode>('simple');
   const [timerState, setTimerState] = useState<TimerState>('idle');
+  const [isEstimating, setIsEstimating] = useState(false);
+  const [durationMinutes, setDurationMinutes] = useState<number | ''>(30);
 
   const [people, setPeople] = useState(4);
   const [salaryInput, setSalaryInput] = useState<number | ''>('');
@@ -54,6 +57,12 @@ export default function App(): ReactNode {
   const handleReset = useCallback(() => {
     timer.reset();
     setTimerState('idle');
+  }, []);
+
+  const handleEstimate = useCallback(() => {
+    timer.pause();
+    setTimerState(timer.state());
+    setIsEstimating(true);
   }, []);
 
   const handleModeChange = useCallback(
@@ -146,14 +155,27 @@ export default function App(): ReactNode {
           computeSalaryCost={computeSalaryCost}
           perMinuteRate={perMinuteRate}
           onCostPercentage={onCostPercentage}
+          estimatedDurationMs={isEstimating ? Number(durationMinutes) * 60_000 : null}
         />
-        <TimerControls
-          timerState={timerState}
-          onStart={handleStart}
-          onPause={handlePause}
-          onResume={handleResume}
-          onReset={handleReset}
-        />
+        {isEstimating ? (
+          <EstimateControls minutes={durationMinutes} onMinutesChange={setDurationMinutes} />
+        ) : (
+          <TimerControls
+            timerState={timerState}
+            onStart={handleStart}
+            onPause={handlePause}
+            onResume={handleResume}
+            onReset={handleReset}
+          />
+        )}
+        <button
+          type="button"
+          onClick={isEstimating ? () => setIsEstimating(false) : handleEstimate}
+          className="min-h-[44px] px-3 py-2 text-sm underline underline-offset-4 hover:no-underline"
+          style={{ color: 'var(--accent)' }}
+        >
+          {isEstimating ? 'Use live timer' : 'Estimate a meeting'}
+        </button>
         {mode === 'simple' ? (
           <SimpleSettings
             people={people}

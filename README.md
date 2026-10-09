@@ -8,6 +8,7 @@ Meetings have a cost. Every attendee has a salary, and the clock is running. Thi
 
 - Simple mode: enter number of people and average salary, start timer
 - Advanced mode: per-person salary input
+- Estimate a meeting: enter a duration or choose 15, 30, 45 or 60 minutes
 - Employer on-costs: Generic UK rates (NI, auto-enrolment pension, apprenticeship levy)
 - Dark mode (follows system preference)
 
