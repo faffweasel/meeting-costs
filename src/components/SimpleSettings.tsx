@@ -1,8 +1,8 @@
 interface SimpleSettingsProps {
   readonly people: number;
-  readonly averageSalary: number;
+  readonly averageSalary: number | '';
   readonly onPeopleChange: (n: number) => void;
-  readonly onSalaryChange: (n: number) => void;
+  readonly onSalaryChange: (n: number | '') => void;
 }
 
 const stepperBtnClass =
@@ -30,8 +30,12 @@ function SimpleSettings({
   }
 
   function handleSalaryChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.value === '') {
+      onSalaryChange('');
+      return;
+    }
     const value = Number(e.target.value);
-    if (!Number.isNaN(value)) {
+    if (Number.isFinite(value)) {
       onSalaryChange(Math.max(1, value));
     }
   }
@@ -95,6 +99,7 @@ function SimpleSettings({
             inputMode="decimal"
             value={averageSalary}
             onChange={handleSalaryChange}
+            placeholder="35000"
             min={1}
             step={1000}
             className="min-h-[44px] w-28 border border-[var(--border)] bg-transparent px-2"

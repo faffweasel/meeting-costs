@@ -25,7 +25,8 @@ export default function App(): ReactNode {
   const [timerState, setTimerState] = useState<TimerState>('idle');
 
   const [people, setPeople] = useState(4);
-  const [averageSalary, setAverageSalary] = useState(35_000);
+  const [salaryInput, setSalaryInput] = useState<number | ''>('');
+  const averageSalary = Number(salaryInput);
 
   const [attendees, setAttendees] = useState<readonly Attendee[]>(() => [
     createAttendee(),
@@ -68,7 +69,7 @@ export default function App(): ReactNode {
             ? Math.round(attendees.reduce((sum, a) => sum + a.salary, 0) / attendees.length)
             : 35_000;
         setPeople(attendees.length);
-        setAverageSalary(avg);
+        setSalaryInput(avg);
       }
       setMode(newMode);
     },
@@ -156,9 +157,9 @@ export default function App(): ReactNode {
         {mode === 'simple' ? (
           <SimpleSettings
             people={people}
-            averageSalary={averageSalary}
+            averageSalary={salaryInput}
             onPeopleChange={setPeople}
-            onSalaryChange={setAverageSalary}
+            onSalaryChange={setSalaryInput}
           />
         ) : (
           <AttendeeList attendees={attendees} onAttendeesChange={setAttendees} />
