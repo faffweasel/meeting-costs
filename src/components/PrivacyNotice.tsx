@@ -5,7 +5,7 @@ function PrivacyNotice(): React.ReactNode {
       style={{ borderTop: '1px solid var(--border)', color: 'var(--muted)' }}
     >
       <p>No data leaves your browser.</p>
-      <p className="mt-1">On-cost rates: UK 2025/26.</p>
+      <p className="mt-1">On-cost rates: UK 2026/27.</p>
     </div>
   );
 }

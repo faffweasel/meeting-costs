@@ -1,4 +1,4 @@
-// UK 2025/26 (from April 2025)
+// UK 2026/27 (from 6 April 2026)
 const EMPLOYER_NI_RATE = 0.15;
 const EMPLOYER_NI_THRESHOLD = 5000; // annual, secondary threshold
 const AUTO_ENROLMENT_LOWER = 6240; // qualifying earnings lower

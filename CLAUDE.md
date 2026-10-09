@@ -91,7 +91,7 @@ interface OnCosts {
 const UK_WORKING_DAYS_PER_YEAR = 252;
 const UK_HOURS_PER_DAY = 7.5;
 
-// UK 2025/26 (from April 2025)
+// UK 2026/27 (from 6 April 2026)
 const EMPLOYER_NI_RATE = 0.15;
 const EMPLOYER_NI_THRESHOLD = 5000;
 const AUTO_ENROLMENT_LOWER = 6240;

@@ -6,9 +6,9 @@ dist/
 *.pem
 *.p12
 *.key
-CLAUDE.local.md
 .DS_Store
-.claude/.mcp.local.json
+.claude/
+.scratch/
 scan-results.json
 *.tsbuildinfo
 .vite/

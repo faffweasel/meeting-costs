@@ -27,7 +27,7 @@ npm run dev
 UK employer on-costs (National Insurance, pension, apprenticeship levy) are
 calculated from published HMRC rates.
 
-- UK employer NI: HMRC 2025/26
+- UK employer NI: HMRC 2026/27
 - Auto-enrolment pension: 3% on qualifying earnings (£6,240–£50,270)
 - Apprenticeship levy: 0.5%
 
