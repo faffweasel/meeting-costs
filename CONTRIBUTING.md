@@ -1,16 +1,5 @@
 # Contributing
 
-Thanks for your interest in contributing.
+Bug reports, documentation corrections, questions, suggestions and ideas are welcome through [GitHub Issues](https://github.com/faffweasel/meeting-costs/issues).
 
-## Licence
-
-By submitting a pull request, you agree that your contributions will be licensed under the AGPL-3.0 licence.
-
-## AI-generated code
-
-If your contribution includes AI-generated code (from Copilot, Claude, ChatGPT, etc.):
-
-- You must review and understand every line before submitting
-- You are responsible for ensuring it doesn't infringe existing licences
-
-We treat AI-assisted code the same as human-written code: the contributor takes responsibility for what they submit.
+External pull requests are not currently accepted.
