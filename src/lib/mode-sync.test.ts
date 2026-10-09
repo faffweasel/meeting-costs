@@ -26,7 +26,7 @@ describe('mode sync: simple → advanced', () => {
       createAttendee({ salary: averageSalary })
     );
     const advancedCost = calculateAdvancedCost(
-      attendees.map((a) => a.salary),
+      attendees.map((a) => Number(a.salary)),
       elapsedMs
     );
     expect(advancedCost).toBeCloseTo(simpleCost, 2);
@@ -49,24 +49,19 @@ describe('mode sync: advanced → simple', () => {
       createAttendee({ salary: 40_000 }),
       createAttendee({ salary: 50_000 }),
     ];
-    const avg = Math.round(attendees.reduce((sum, a) => sum + a.salary, 0) / attendees.length);
+    const avg = Math.round(
+      attendees.reduce((sum, a) => sum + Number(a.salary), 0) / attendees.length
+    );
     expect(avg).toBe(40_000);
   });
 
   it('rounds average salary to the nearest pound', () => {
     const attendees = [createAttendee({ salary: 33_333 }), createAttendee({ salary: 33_334 })];
-    const avg = Math.round(attendees.reduce((sum, a) => sum + a.salary, 0) / attendees.length);
+    const avg = Math.round(
+      attendees.reduce((sum, a) => sum + Number(a.salary), 0) / attendees.length
+    );
     // (33333 + 33334) / 2 = 33333.5 → rounds to 33334
     expect(avg).toBe(33_334);
-  });
-
-  it('falls back to £35,000 when attendee list is empty', () => {
-    const attendees: readonly ReturnType<typeof createAttendee>[] = [];
-    const avg =
-      attendees.length > 0
-        ? Math.round(attendees.reduce((sum, a) => sum + a.salary, 0) / attendees.length)
-        : 35_000;
-    expect(avg).toBe(35_000);
   });
 
   it('preserves meeting cost after sync (linear hourly rates)', () => {
@@ -77,10 +72,12 @@ describe('mode sync: advanced → simple', () => {
     ];
     const elapsedMs = 1_800_000; // 30 min
     const advancedCost = calculateAdvancedCost(
-      attendees.map((a) => a.salary),
+      attendees.map((a) => Number(a.salary)),
       elapsedMs
     );
-    const avg = Math.round(attendees.reduce((sum, a) => sum + a.salary, 0) / attendees.length);
+    const avg = Math.round(
+      attendees.reduce((sum, a) => sum + Number(a.salary), 0) / attendees.length
+    );
     const simpleCost = calculateSimpleCost(attendees.length, avg, elapsedMs);
     // Linear rates → average preserves total cost (within rounding tolerance)
     expect(simpleCost).toBeCloseTo(advancedCost, 1);

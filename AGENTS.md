@@ -24,6 +24,7 @@ React + Vite + TypeScript (strict) + Tailwind CSS v4. Single-page app, no routin
 - Timer must use `performance.now()` — not `Date.now()` — to avoid drift on pause/resume
 - Timer display updates at 100ms intervals via `requestAnimationFrame` or `setInterval`
 - No external runtime dependencies beyond React. All data is hardcoded constants.
+- Keep all dependencies up to date, including compatible major upgrades. Choose stable releases at least seven days old, except when a newer release fixes a security issue. Apply the same delay to transitive dependencies.
 - Tailwind utility classes only, no custom CSS files
 - Dark mode via `prefers-color-scheme` media query (follow system, no manual toggle)
 
@@ -73,7 +74,7 @@ src/
 interface Attendee {
   id: string;
   label: string;
-  salary: number;
+  salary: number | '';
 }
 
 interface OnCosts {

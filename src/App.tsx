@@ -69,26 +69,24 @@ export default function App(): ReactNode {
     (newMode: Mode) => {
       if (newMode === mode) return;
       if (newMode === 'advanced') {
-        setAttendees(
-          Array.from({ length: people }, () => createAttendee({ salary: averageSalary }))
-        );
+        setAttendees(Array.from({ length: people }, () => createAttendee({ salary: salaryInput })));
       } else {
         const avg =
           attendees.length > 0
-            ? Math.round(attendees.reduce((sum, a) => sum + a.salary, 0) / attendees.length)
-            : 35_000;
+            ? Math.round(attendees.reduce((sum, a) => sum + Number(a.salary), 0) / attendees.length)
+            : 0;
         setPeople(attendees.length);
-        setSalaryInput(avg);
+        setSalaryInput(attendees.every((a) => a.salary === '') ? '' : avg);
       }
       setMode(newMode);
     },
-    [mode, people, averageSalary, attendees]
+    [mode, people, salaryInput, attendees]
   );
 
-  const salaries = mode === 'advanced' ? attendees.map((a) => a.salary) : [];
+  const salaries = mode === 'advanced' ? attendees.map((a) => Number(a.salary)) : [];
   const onCostsPerAttendee =
     mode === 'advanced' && includeOnCosts
-      ? attendees.map((a) => calculateOnCosts(a.salary, includeLevy))
+      ? attendees.map((a) => calculateOnCosts(Number(a.salary), includeLevy))
       : [];
   const simpleOnCosts = includeOnCosts ? calculateOnCosts(averageSalary, includeLevy) : null;
 

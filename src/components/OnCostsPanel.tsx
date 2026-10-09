@@ -94,7 +94,7 @@ function OnCostsPanel({
                       return (
                         <tr key={attendee.id} className="border-b border-[var(--border)]">
                           <td className="py-2">{attendee.label || `Attendee ${i + 1}`}</td>
-                          <td className="py-2 text-right">{formatGBP(attendee.salary)}</td>
+                          <td className="py-2 text-right">{formatGBP(Number(attendee.salary))}</td>
                           <td className="py-2 text-right">{formatGBP(oc.employerNi)}</td>
                           <td className="py-2 text-right">{formatGBP(oc.employerPension)}</td>
                           <td className="py-2 text-right">{formatGBP(oc.apprenticeshipLevy)}</td>

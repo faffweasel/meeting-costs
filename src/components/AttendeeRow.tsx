@@ -20,9 +20,13 @@ function AttendeeRow({
   }
 
   function handleSalaryChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.value === '') {
+      onUpdate(attendee.id, { ...attendee, salary: '' });
+      return;
+    }
     const value = Number(e.target.value);
-    if (!Number.isNaN(value)) {
-      onUpdate(attendee.id, { ...attendee, salary: Math.max(1, value) });
+    if (Number.isFinite(value)) {
+      onUpdate(attendee.id, { ...attendee, salary: Math.max(0, value) });
     }
   }
 
@@ -49,7 +53,8 @@ function AttendeeRow({
         inputMode="decimal"
         value={attendee.salary}
         onChange={handleSalaryChange}
-        min={1}
+        placeholder="35000"
+        min={0}
         step={1000}
         aria-label="Annual salary"
         className={`${INPUT_CLASS} w-full max-w-[140px] shrink-0`}

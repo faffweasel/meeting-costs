@@ -1,13 +1,13 @@
 interface Attendee {
   readonly id: string;
   readonly label: string;
-  readonly salary: number;
+  readonly salary: number | '';
 }
 
 function createAttendee(overrides?: Partial<Omit<Attendee, 'id'>>): Attendee {
   return {
     label: '',
-    salary: 35_000,
+    salary: '',
     ...overrides,
     id: crypto.randomUUID(),
   };

@@ -1,10 +1,4 @@
-import {
-  type ChangeEvent,
-  Children,
-  isValidElement,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import type { ChangeEvent } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from '../App.tsx';
@@ -13,36 +7,11 @@ import { calculateOnCosts } from '../lib/on-costs.ts';
 import { createTimer } from '../lib/timer.ts';
 import { CostDisplay } from './CostDisplay.tsx';
 import { EstimateControls } from './EstimateControls.tsx';
+import { findControl } from './test-controls.ts';
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
-
-interface ControlProps {
-  readonly children?: ReactNode;
-  readonly 'aria-label'?: string;
-  readonly 'aria-pressed'?: boolean;
-  readonly value?: number | '';
-  readonly onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
-  readonly onClick?: () => void;
-}
-
-function findControl(
-  node: ReactNode,
-  type: 'input' | 'button',
-  label?: string
-): ReactElement<ControlProps> {
-  const pending = Children.toArray(node);
-  while (pending.length > 0) {
-    const child = pending.shift();
-    if (!isValidElement<ControlProps>(child)) continue;
-    if (child.type === type && (label === undefined || child.props['aria-label'] === label)) {
-      return child;
-    }
-    pending.push(...Children.toArray(child.props.children));
-  }
-  throw new Error(`Missing ${label ?? type} control`);
-}
 
 describe('estimate duration controls', () => {
   it('can clear the duration and enter a replacement', () => {
@@ -122,34 +91,38 @@ describe('meeting estimate display', () => {
     expect(markup).not.toContain('PAUSED');
   });
 
-  it.each([
-    'simple',
-    'advanced',
-  ])('uses the estimated duration for salary and on-costs in %s mode', (mode) => {
-    const onCosts = calculateOnCosts(35_000);
-    const salaries = Array.from({ length: 6 }, () => 35_000);
-    const trueCostSalaries = salaries.map((salary) => calculateOnCosts(salary).totalEmploymentCost);
-    const computeCost = (ms: number) =>
-      mode === 'simple'
-        ? calculateSimpleCost(6, onCosts.totalEmploymentCost, ms)
-        : calculateAdvancedCost(trueCostSalaries, ms);
-    const computeSalaryCost = (ms: number) =>
-      mode === 'simple' ? calculateSimpleCost(6, 35_000, ms) : calculateAdvancedCost(salaries, ms);
-    const markup = renderToStaticMarkup(
-      <CostDisplay
-        timer={createTimer(() => 0)}
-        timerState="idle"
-        computeCost={computeCost}
-        computeSalaryCost={computeSalaryCost}
-        perMinuteRate={computeCost(60_000)}
-        onCostPercentage={onCosts.onCostPercentage}
-        estimatedDurationMs={30 * 60_000}
-      />
-    );
-    expect(markup).toContain('£64.35');
-    expect(markup).toContain('Salary cost: £55.56');
-    expect(markup).toContain('On-costs add ~16%');
-  });
+  it.each(['simple', 'advanced'])(
+    'uses the estimated duration for salary and on-costs in %s mode',
+    (mode) => {
+      const onCosts = calculateOnCosts(35_000);
+      const salaries = Array.from({ length: 6 }, () => 35_000);
+      const trueCostSalaries = salaries.map(
+        (salary) => calculateOnCosts(salary).totalEmploymentCost
+      );
+      const computeCost = (ms: number) =>
+        mode === 'simple'
+          ? calculateSimpleCost(6, onCosts.totalEmploymentCost, ms)
+          : calculateAdvancedCost(trueCostSalaries, ms);
+      const computeSalaryCost = (ms: number) =>
+        mode === 'simple'
+          ? calculateSimpleCost(6, 35_000, ms)
+          : calculateAdvancedCost(salaries, ms);
+      const markup = renderToStaticMarkup(
+        <CostDisplay
+          timer={createTimer(() => 0)}
+          timerState="idle"
+          computeCost={computeCost}
+          computeSalaryCost={computeSalaryCost}
+          perMinuteRate={computeCost(60_000)}
+          onCostPercentage={onCosts.onCostPercentage}
+          estimatedDurationMs={30 * 60_000}
+        />
+      );
+      expect(markup).toContain('£64.35');
+      expect(markup).toContain('Salary cost: £55.56');
+      expect(markup).toContain('On-costs add ~16%');
+    }
+  );
 
   it('shows zero cost for an empty duration', () => {
     const markup = renderToStaticMarkup(

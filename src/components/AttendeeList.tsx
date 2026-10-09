@@ -12,8 +12,8 @@ const MAX_ATTENDEES = 100;
 
 function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): React.ReactNode {
   const canAdd = attendees.length < MAX_ATTENDEES;
-  const [quickCount, setQuickCount] = useState(1);
-  const [quickSalary, setQuickSalary] = useState(35_000);
+  const [quickCount, setQuickCount] = useState<number | ''>(1);
+  const [quickSalary, setQuickSalary] = useState<number | ''>('');
 
   function handleUpdate(id: string, updated: Attendee) {
     onAttendeesChange(attendees.map((a) => (a.id === id ? updated : a)));
@@ -30,7 +30,7 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
 
   function handleQuickAdd() {
     const remaining = MAX_ATTENDEES - attendees.length;
-    if (remaining <= 0) return;
+    if (remaining <= 0 || quickCount === '') return;
     const count = Math.max(1, Math.min(remaining, quickCount));
     const newAttendees = Array.from({ length: count }, () =>
       createAttendee({ salary: quickSalary })
@@ -39,13 +39,23 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
   }
 
   function handleQuickCountChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.value === '') {
+      setQuickCount('');
+      return;
+    }
     const value = Number(e.target.value);
-    if (!Number.isNaN(value)) setQuickCount(Math.max(1, value));
+    if (Number.isFinite(value)) {
+      setQuickCount(Math.max(1, Math.min(MAX_ATTENDEES - attendees.length, Math.round(value))));
+    }
   }
 
   function handleQuickSalaryChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.value === '') {
+      setQuickSalary('');
+      return;
+    }
     const value = Number(e.target.value);
-    if (!Number.isNaN(value)) setQuickSalary(Math.max(0, value));
+    if (Number.isFinite(value)) setQuickSalary(Math.max(0, value));
   }
 
   return (
@@ -79,7 +89,7 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
             <span className="tracking-wider">ADD</span>
             <input
               type="number"
-              inputMode="decimal"
+              inputMode="numeric"
               value={quickCount}
               onChange={handleQuickCountChange}
               min={1}
@@ -94,6 +104,7 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
               inputMode="decimal"
               value={quickSalary}
               onChange={handleQuickSalaryChange}
+              placeholder="35000"
               min={0}
               step={1000}
               className={`${INPUT_CLASS} w-24`}
@@ -103,7 +114,8 @@ function AttendeeList({ attendees, onAttendeesChange }: AttendeeListProps): Reac
             <button
               type="button"
               onClick={handleQuickAdd}
-              className="min-h-[44px] bg-[var(--accent)] px-4 py-2 font-bold tracking-wider text-[var(--bg)] hover:opacity-80"
+              disabled={quickCount === ''}
+              className="min-h-[44px] bg-[var(--accent)] px-4 py-2 font-bold tracking-wider text-[var(--bg)] hover:opacity-80 disabled:opacity-50"
             >
               ADD
             </button>
